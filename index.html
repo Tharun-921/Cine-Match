@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineMatch | Discover Movies</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background: #0b0b12;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 22px 6%;
+            background: #11111b;
+            border-bottom: 1px solid #252535;
+        }
+        .logo { font-size: 28px; font-weight: bold; color: #ff3158; }
+        .logo span { color: white; }
+        .hero {
+            padding: 55px 6% 35px;
+            background: linear-gradient(120deg, #27112b, #10101c 70%);
+        }
+        .hero h1 { font-size: clamp(32px, 5vw, 54px); margin-bottom: 12px; }
+        .hero p { color: #c1c1d0; }
+        input, select {
+            padding: 13px;
+            border-radius: 8px;
+            border: 1px solid #383849;
+            background: #191925;
+            color: white;
+            margin: 8px 8px 8px 0;
+        }
+        input { width: min(320px, 100%); }
+        main { padding: 30px 6%; }
+        .movies {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 22px;
+        }
+        .card {
+            background: #171722;
+            border: 1px solid #292938;
+            border-radius: 13px;
+            overflow: hidden;
+            transition: transform .2s;
+        }
+        .card:hover { transform: translateY(-5px); }
+        .poster {
+            height: 260px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 55px;
+            background: linear-gradient(145deg, #482044, #181827);
+        }
+        .info { padding: 16px; }
+        .info h3 { margin: 0 0 10px; }
+        .genre { color: #aaaabb; font-size: 13px; }
+        .rating { color: #ffc857; margin: 12px 0; }
+        .rate-btn {
+            border: 0;
+            padding: 10px;
+            border-radius: 7px;
+            color: white;
+            background: #ff3158;
+            cursor: pointer;
+        }
+        footer { text-align: center; padding: 30px; color: #888; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Cine<span>Match</span></div>
+        <div>Discover your next favourite 🎬</div>
+    </header>
+
+    <section class="hero">
+        <h1>Movies you'll love.</h1>
+        <p>Explore movies, rate your favourites and find your next watch.</p>
+        <input id="search" type="text" placeholder="Search movies...">
+        <select id="genre">
+            <option value="All">All Genres</option>
+            <option>Action</option>
+            <option>Comedy</option>
+            <option>Romance</option>
+            <option>Sci-Fi</option>
+            <option>Thriller</option>
+        </select>
+    </section>
+
+    <main>
+        <h2>🔥 Trending Movies</h2>
+        <div class="movies" id="movies">
+            {% for movie in movies %}
+            <article class="card"
+                data-name="{{ movie.name }}"
+                data-genre="{{ movie.genre }}">
+                <div class="poster">🎬</div>
+                <div class="info">
+                    <h3>{{ movie.name }}</h3>
+                    <div class="genre">{{ movie.genre }}</div>
+                    <div class="rating">⭐ {{ movie.rating }}/10</div>
+                    <button class="rate-btn"
+                        onclick="rateMovie('{{ movie.name }}')">
+                        ⭐ Rate Movie
+                    </button>
+                    <p class="your-rating"></p>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        <p id="empty" style="display:none">No movies found. Try another search.</p>
+    </main>
+
+    <footer>Made with ❤️ | CineMatch Movie Recommendation System</footer>
+
+    <script>
+        const search = document.getElementById("search");
+        const genre = document.getElementById("genre");
+        const cards = [...document.querySelectorAll(".card")];
+
+        function filterMovies() {
+            const term = search.value.toLowerCase();
+            let count = 0;
+
+            cards.forEach(card => {
+                const matchesName =
+                    card.dataset.name.toLowerCase().includes(term);
+                const matchesGenre =
+                    genre.value === "All" ||
+                    card.dataset.genre === genre.value;
+
+                card.style.display =
+                    matchesName && matchesGenre ? "" : "none";
+
+                if (matchesName && matchesGenre) count++;
+            });
+
+            document.getElementById("empty").style.display =
+                count ? "none" : "block";
+        }
+
+        search.addEventListener("input", filterMovies);
+        genre.addEventListener("change", filterMovies);
+
+        function rateMovie(name) {
+            const answer = prompt(
+                "Rate " + name + " from 1 to 5 stars:"
+            );
+            if (answer === null || answer.trim() === "") return;
+
+            const rating = Number(answer);
+            if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+                alert("Please enter a whole number from 1 to 5.");
+                return;
+            }
+
+            const card = cards.find(
+                item => item.dataset.name === name
+            );
+
+            card.querySelector(".your-rating").textContent =
+                "Your rating: " + "⭐".repeat(rating);
+        }
+    </script>
+</body>
+</html>
